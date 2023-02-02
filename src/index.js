@@ -36,39 +36,34 @@ async function fetchGalleryImage(search) {
       Notify.success(`Hooray! We found ${response.data.totalHits} images.`, {
         timeout: 2000,
       });
+    } else if (response.data.totalHits === 0) {
+      Notify.failure(
+        "Sorry, there are no images matching your search query. Please try again."
+      );
     }
     lightBox.refresh();
-
-    // totalPages = Math.ceil(response.data.totalHits / 40);
-    // let totalPages = response.data.totalHits / 40;
 
     totalPages = Math.ceil(response.data.totalHits / per_page);
 
     if (totalPages >= page) {
-      // page += 1;
       loadMoreBtn.classList.replace("btn-hidden", "btn-visible");
       loadMoreBtn.addEventListener("click", (e) => {
         page += 1;
         fetchGalleryImage(search);
       });
-    } else if (page >= totalPages) {
+      const { height: cardHeight } =
+        gallery.firstElementChild.getBoundingClientRect();
+
+      window.scrollBy({
+        top: cardHeight * 2,
+        behavior: "smooth",
+      });
+    } else if (page > totalPages && page !== 1) {
       Notify.info("You've reached the end of search results");
       loadMoreBtn.disabled = true;
     }
-    // const { height: cardHeight } =
-    //   gallery.firstElementChild.getBoundingClientRect();
-
-    // window.scrollBy({
-    //   top: cardHeight * 0,
-    //   behavior: "smooth",
-    // });
   } catch (error) {
-    Notify.failure(
-      ("Sorry, there are no images matching your search query. Please try again.",
-      {
-        timeout: 2000,
-      })
-    );
+    console.log(error);
   }
 }
 
@@ -95,18 +90,12 @@ searchForm.addEventListener("submit", (e) => {
   if (searchInput.value !== "") {
     fetchGalleryImage(searchInput.value);
     return;
+  } else {
+    // Notify.failure(
+    //   ("Sorry, there are no images matching your search query. Please try again.",
+    //   {
+    //     timeout: 2000,
+    //   })
+    // );
   }
 });
-
-// function loadMore() {
-//   totalPages = Math.ceil(response.data.totalHits / per_page);
-//   console.log(totalPages);
-
-//   if (totalPages > page) {
-//     page += 1;
-//     loadMoreBtn.classList.replace("btn-hidden", "btn-visible");
-//     loadMoreBtn.addEventListener("click", fetchGalleryImage);
-//   } else {
-//     Notify.info("You've reached the end of search results");
-//   }
-// }
