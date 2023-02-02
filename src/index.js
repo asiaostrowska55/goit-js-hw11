@@ -91,11 +91,5 @@ searchForm.addEventListener("submit", (e) => {
     fetchGalleryImage(searchInput.value);
     return;
   } else {
-    // Notify.failure(
-    //   ("Sorry, there are no images matching your search query. Please try again.",
-    //   {
-    //     timeout: 2000,
-    //   })
-    // );
   }
 });
