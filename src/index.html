@@ -3,25 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homework 9</title>
+    <title>Homework 11</title>
     <link rel="stylesheet" href="common.css" />
   </head>
   <body>
-    <form class="search-form" id="search-form">
-      <input
-        type="text"
-        name="searchQuery"
-        autocomplete="off"
-        placeholder="Search images..."
-      />
-      <button type="submit" class="search-btn">Search</button>
-    </form>
-
-    <div class="gallery">
-      <!-- insert gallery elem from js -->
-    </div>
-
-    <button type="button" class="load-more">Load more</button>
+    <header class="header">
+      <form class="search-form" id="search-form">
+        <input
+          class="search-form__input"
+          type="text"
+          name="searchQuery"
+          autocomplete="off"
+          placeholder="Search images..."
+        />
+        <button type="submit" class="search-btn">Search</button>
+      </form>
+    </header>
+    <main>
+      <div class="gallery"></div>
+    </main>
+    <footer>
+      <button type="button" class="load-more">Load more</button>
+    </footer>
     <script src="./index.js" type="module"></script>
   </body>
 </html>

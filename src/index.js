@@ -3,48 +3,72 @@ import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 
-const API_KEY = "33257268-27ad9fcecc17d6e2546f4b9dc";
 const searchForm = document.querySelector(".search-form");
+const searchInput = document.querySelector(".search-form__input");
 const gallery = document.querySelector(".gallery");
+const loadMoreBtn = document.querySelector(".load-more");
+loadMoreBtn.classList.add("btn-hidden");
 
 let page = 1;
-let totalPages = 0;
+let per_page = 40;
+
 const lightBox = new SimpleLightbox(".gallery a");
 const axios = require("axios").default;
 
-async function fetchGalleryImage(search, page) {
+async function fetchGalleryImage(search) {
   try {
     const response = await axios.get("https://pixabay.com/api/", {
       params: {
-        key: API_KEY,
+        key: "33257268-27ad9fcecc17d6e2546f4b9dc",
         q: search,
         image_type: "photo",
         orientation: "horizonatal",
         safesearch: true,
-        per_page: 40,
-        page: page,
+        per_page,
+        page,
       },
     });
-    const data = response.data;
-    if (data.totalHits > 0) {
-      data.hits.forEach((photo) => {
-        renderGalleryItem(photo);
+    const data = response.data.hits;
+    data.forEach((photo) => {
+      renderGalleryItem(photo);
+    });
+    if (response.data.totalHits > 0 && page === 1) {
+      Notify.success(`Hooray! We found ${response.data.totalHits} images.`, {
+        timeout: 2000,
       });
-      Notify.success(`Hooray! We found ${data.totalHits} images.`);
     }
     lightBox.refresh();
-    const { height: cardHeight } =
-      gallery.firstElementChild.getBoundingClientRect();
 
-    window.scrollBy({
-      top: cardHeight * 2,
-      behavior: "smooth",
-    });
+    // totalPages = Math.ceil(response.data.totalHits / 40);
+    // let totalPages = response.data.totalHits / 40;
+
+    totalPages = Math.ceil(response.data.totalHits / per_page);
+
+    if (totalPages >= page) {
+      // page += 1;
+      loadMoreBtn.classList.replace("btn-hidden", "btn-visible");
+      loadMoreBtn.addEventListener("click", (e) => {
+        page += 1;
+        fetchGalleryImage(search);
+      });
+    } else if (page >= totalPages) {
+      Notify.info("You've reached the end of search results");
+      loadMoreBtn.disabled = true;
+    }
+    // const { height: cardHeight } =
+    //   gallery.firstElementChild.getBoundingClientRect();
+
+    // window.scrollBy({
+    //   top: cardHeight * 0,
+    //   behavior: "smooth",
+    // });
   } catch (error) {
     Notify.failure(
-      "Sorry, there are no images matching your search query. Please try again."
+      ("Sorry, there are no images matching your search query. Please try again.",
+      {
+        timeout: 2000,
+      })
     );
-    console.log(error);
   }
 }
 
@@ -53,8 +77,9 @@ const renderGalleryItem = (image) => {
     "beforeend",
     `<div class="photo-card">
 <a href="${image.largeImageURL}">
-<img src="${image.webformatURL}" loading="lazy" alt="${image.tags}" />
-<div class="info"> </a>
+<img src="${image.webformatURL}" loading="lazy" alt="${image.tags}" /> 
+</a>
+<div class="info"> 
 <p class="info-item"><b><strong>Likes</strong></b> ${image.likes}</p>
 <p class="info-item"><b><strong>Views</strong></b> ${image.views}</p>
 <p class="info-item"><b><strong>Comments</strong></b> ${image.comments}</p>
@@ -63,19 +88,25 @@ const renderGalleryItem = (image) => {
 </div>`
   );
 };
-const loadMoreBtn = document.querySelector(".load-more");
-const searchBtn = document.querySelector(".search-btn");
-searchBtn.addEventListener("submit", (e) => {
+
+searchForm.addEventListener("submit", (e) => {
   e.preventDefault();
   gallery.innerHTML = "";
-  if (searchForm.value !== "") {
-    fetchGalleryImage(searchForm.value.trim());
-  } else {
+  if (searchInput.value !== "") {
+    fetchGalleryImage(searchInput.value);
     return;
   }
 });
-if (page === 1 && totalPages !== 0) {
-  loadMoreBtn.style.display = "block";
-} else {
-  loadMoreBtn.style.display = "none";
-}
+
+// function loadMore() {
+//   totalPages = Math.ceil(response.data.totalHits / per_page);
+//   console.log(totalPages);
+
+//   if (totalPages > page) {
+//     page += 1;
+//     loadMoreBtn.classList.replace("btn-hidden", "btn-visible");
+//     loadMoreBtn.addEventListener("click", fetchGalleryImage);
+//   } else {
+//     Notify.info("You've reached the end of search results");
+//   }
+// }
